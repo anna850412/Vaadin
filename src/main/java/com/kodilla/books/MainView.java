@@ -3,6 +3,7 @@ package com.kodilla.books;
 import com.kodilla.books.domain.Book;
 import com.kodilla.books.domain.BookForm;
 import com.kodilla.books.service.BookService;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -16,6 +17,7 @@ public class MainView extends VerticalLayout {
     private Grid<Book> grid = new Grid<>(Book.class);
     private TextField filter = new TextField();
     private BookForm form = new BookForm(this);
+    private Button addNewBook = new Button("Add new book");
 
     public MainView() {
 
@@ -24,13 +26,23 @@ public class MainView extends VerticalLayout {
         filter.setValueChangeMode(ValueChangeMode.EAGER);
         filter.addValueChangeListener(e -> update());
         grid.setColumns("title", "author", "publicationYear", "type");
+        form.setBook(null);
+
+        addNewBook.addClickListener(e -> {
+            grid.asSingleSelect().clear(); //"czyścimy" zaznaczenie
+            form.setBook(new Book());      //dodajemy nowy obiekt do formularza
+        });
+        HorizontalLayout toolbar = new HorizontalLayout(filter, addNewBook);
+
         HorizontalLayout mainContent = new HorizontalLayout(grid, form);
         mainContent.setSizeFull();
         grid.setSizeFull();
 
-        add(filter, mainContent);
+        add(toolbar, mainContent);
         setSizeFull();
         refresh();
+
+        grid.asSingleSelect().addValueChangeListener(event -> form.setBook(grid.asSingleSelect().getValue()));
 
     }
     private void update() {
